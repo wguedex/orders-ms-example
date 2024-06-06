@@ -13,6 +13,7 @@ import { OrderPaginationDTO } from './dto/order-pagination.dto';
 import { ChangeOrderStatusDTO } from './dto';
 import { firstValueFrom } from 'rxjs';
 import { NATS_SERVICE } from 'src/config/services';
+import { OrderWithProducts } from 'src/interfaces/order-with-products.interface';
 // import { PRODUCT_SERVICE } from 'src/config';
 
 @Injectable()
@@ -181,4 +182,28 @@ export class OrdersService extends PrismaClient implements OnModuleInit {
       },
     });
   }
+
+  async createPaymentSession(order: OrderWithProducts){
+
+    console.log('aqui',order)
+    const paymentSession = await firstValueFrom(
+      this.client.send('create.payment.session',{
+
+        orderId: order.id,
+        currency: 'usd',
+        items: [
+          {
+          name: 'Producto 1', 
+          price: 100, 
+          quantity: 2
+        }
+      ], 
+      })
+    );
+    
+
+    return paymentSession;
+
+  }
+
 }
