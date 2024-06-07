@@ -183,27 +183,23 @@ export class OrdersService extends PrismaClient implements OnModuleInit {
     });
   }
 
-  async createPaymentSession(order: OrderWithProducts){
+  async createPaymentSession(order: OrderWithProducts) {
 
-    console.log('aqui',order)
+    console.log('aqui', order.OrderItem);
+    
     const paymentSession = await firstValueFrom(
-      this.client.send('create.payment.session',{
-
+      this.client.send('create.payment.session', {
         orderId: order.id,
         currency: 'usd',
-        items: [
-          {
-          name: 'Producto 1', 
-          price: 100, 
-          quantity: 2
-        }
-      ], 
+        items: order.OrderItem.map(item => ({
+          name: item.name,
+          price: item.price,
+          quantity: item.quantity
+        }))
       })
     );
-    
-
+  
     return paymentSession;
-
   }
 
 }
