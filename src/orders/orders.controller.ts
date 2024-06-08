@@ -5,6 +5,7 @@ import { CreateOrderDto } from './dto/create-order.dto';
 import { UpdateOrderDto } from './dto/update-order.dto';
 import { OrderPaginationDTO } from './dto/order-pagination.dto';
 import { ChangeOrderStatusDTO } from './dto/change-order-status.dto';
+import { PaidOrderDto } from './dto';
 
 @Controller()
 export class OrdersController {
@@ -15,18 +16,30 @@ export class OrdersController {
   //   return this.ordersService.create(createOrderDto);
   // }
 
+  // @MessagePattern('createOrder')
+  // async create(@Payload() createOrderDto: CreateOrderDto) {
+
+  //   // console.log(createOrderDto)
+
+  //   const order = await this.ordersService.create(createOrderDto); 
+  //   const paymentSession = await this.ordersService.createPaymentSession(order);
+
+  //   return {
+  //     order,
+  //     paymentSession
+  //   };
+  // }
+ 
   @MessagePattern('createOrder')
   async create(@Payload() createOrderDto: CreateOrderDto) {
 
-    // console.log(createOrderDto)
-
-    const order = await this.ordersService.create(createOrderDto); 
-    const paymentSession = await this.ordersService.createPaymentSession(order);
+    const order = await this.ordersService.create(createOrderDto);
+    const paymentSession = await this.ordersService.createPaymentSession(order)
 
     return {
       order,
-      paymentSession
-    };
+      paymentSession,
+    }
   }
 
   @MessagePattern('findAllOrders')
@@ -49,12 +62,12 @@ export class OrdersController {
   
   @EventPattern('payment.succeeded')
   async paidOrder(
-    @Payload() paiOrderDTO: any
+    @Payload() paidOrderDto: PaidOrderDto
   ){
+ 
+    console.log(paidOrderDto)
 
-    console.log({paiOrderDTO})
-
-    // return this.ordersService.changeStatus(changeOrderStatusDTO); 
+    return this.ordersService.paidOrder(paidOrderDto); 
   }   
 
 }
