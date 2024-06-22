@@ -13,9 +13,9 @@ steps:
     'push',  
     'northamerica-northeast1-docker.pkg.dev/tienda-microservices-427201/image-registry/orders-ms' 
         ]
-artifacts:
-  objects:
-    location: 'gs://tienda-ms-bucket'
-    paths: ['**']
-options:
-  logging: CLOUD_LOGGING_ONLY
+# artifacts:
+#   objects:
+#     location: 'gs://tienda-ms-bucket'
+#     paths: ['**']
+# options:
+#   logging: CLOUD_LOGGING_ONLY
