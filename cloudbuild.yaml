@@ -1,11 +1,13 @@
 steps:
 - name: 'gcr.io/cloud-builders/docker'
-  entrypoint: 'bash'
+  entrypoint: 'bash'  # Optional, can be omitted if using a single line script
   args:
-    - -c
-    - |
-      docker build -t northamerica-northeast1-docker.pkg.dev/tienda-microservices-427201/image-registry/orders-ms -f dockerfile.prod --platform=linux/amd64 --build-arg ORDERS_DATABASE_URL=$$DATABASE_URL .
-  secretEnv: ['DATABASE_URL']
+    - -c  # Execute the following command
+      |  # Multiline script (optional, see note below)
+        docker build -t northamerica-northeast1-docker.pkg.dev/tienda-microservices-427201/image-registry/orders-ms \
+          -f dockerfile.prod \
+          --platform=linux/amd64 \
+          --build-arg ORDERS_DATABASE_URL=$DATABASE_URL .
 
 - name: 'gcr.io/cloud-builders/docker'
   args:
