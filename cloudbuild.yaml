@@ -1,28 +1,27 @@
 steps:
-  - name: 'gcr.io/cloud-builders/docker'
-    entrypoint: 'bash'
-    args:
-      - '-c'
-      - |
-        docker build --build-arg CONTAINER_PRIVATE_KEY=$$PRIVATE_KEY --build-arg CONTAINER_PUBLIC_KEY=$$PUBLIC_KEY -t gcr.io/${PROJECT_ID}/${_JOB_NAME} .
-    secretEnv:
-      - 'PRIVATE_KEY'
-      - 'PUBLIC_KEY'
+- name: 'gcr.io/cloud-builders/docker'
+  entrypoint: 'bash'
+  args:
+    - -c
+    - |
+      docker build -t northamerica-northeast1-docker.pkg.dev/tienda-microservices-427201/image-registry/orders-ms -f dockerfile.prod --platform=linux/amd64 --build-arg ORDERS_DATABASE_URL=$$DATABASE_URL .
+  secretEnv: ['DATABASE_URL']
 
-  - name: 'gcr.io/cloud-builders/docker'
-    args:
-      - 'push'
-      - 'northamerica-northeast1-docker.pkg.dev/tienda-microservices-427201/image-registry/orders-ms'
+- name: 'gcr.io/cloud-builders/docker'
+  args:
+    [
+      'push',
+      'northamerica-northeast1-docker.pkg.dev/tienda-microservices-427201/image-registry/orders-ms',
+    ]
 
 availableSecrets:
   secretManager:
-    - versionName: projects/239214435622/secrets/ORDERS_DATABASE_URL/versions/2
-      env: 'DATABASE_URL'
+  - versionName: projects/239214435622/secrets/ORDERS_DATABASE_URL/versions/2
+    env: 'DATABASE_URL'
 
 artifacts:
   objects:
     location: 'gs://tienda-ms-bucket'
     paths: ['**']
-
 options:
   logging: CLOUD_LOGGING_ONLY
