@@ -1,18 +1,39 @@
+# steps:
+# - name: 'gcr.io/cloud-builders/docker'
+#   args: [
+#     'build', 
+#     '-t', 
+#     'northamerica-northeast1-docker.pkg.dev/tienda-microservices-427201/image-registry/orders-ms', 
+#     '-f', 
+#     'dockerfile.prod',
+#     '--platform=linux/amd64',
+#     '.']
+# - name: 'gcr.io/cloud-builders/docker'
+#   args: [
+#     'push',  
+#     'northamerica-northeast1-docker.pkg.dev/tienda-microservices-427201/image-registry/orders-ms' 
+#         ]
+
 steps:
 - name: 'gcr.io/cloud-builders/docker'
-  args: [
-    'build', 
-    '-t', 
-    'northamerica-northeast1-docker.pkg.dev/tienda-microservices-427201/image-registry/orders-ms', 
-    '-f', 
-    'dockerfile.prod',
-    '--platform=linux/amd64',
-    '.']
+  entrypoint: 'bash'
+  args:
+    - -c
+    - |
+      docker build -t northamerica-northeast1-docker.pkg.dev/tienda-microservices-427201/image-registry/orders-ms -f dockerfile.prod --platform=linux/amd64 --build-arg ORDERS_DATABASE_URL=$$DATABASE_URL .
+  secretEnv: ['DATABASE_URL']
+
 - name: 'gcr.io/cloud-builders/docker'
-  args: [
-    'push',  
-    'northamerica-northeast1-docker.pkg.dev/tienda-microservices-427201/image-registry/orders-ms' 
-        ]
+  args:
+    [
+      'push',
+      'northamerica-northeast1-docker.pkg.dev/tienda-microservices-427201/image-registry/orders-ms',
+    ]
+
+availableSecrets:
+  secretManager:
+  - versionName: projects/239214435622/secrets/ORDERS_DATABASE_URL/versions/1
+    env: 'DATABASE_URL'
 artifacts:
   objects:
     location: 'gs://tienda-ms-bucket'
