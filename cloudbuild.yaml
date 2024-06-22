@@ -18,6 +18,7 @@ availableSecrets:
   secretManager:
   - versionName: projects/239214435622/secrets/ORDERS_DATABASE_URL/versions/2
     env: 'DATABASE_URL'
+
 artifacts:
   objects:
     location: 'gs://tienda-ms-bucket'
