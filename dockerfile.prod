@@ -1,54 +1,61 @@
-# Dependencias
+# Dependencias 
 FROM node:21-alpine3.19 as deps
 
 WORKDIR /usr/src/app
 
-COPY package.json ./
-COPY package-lock.json ./
+COPY package*.json ./
 
-RUN npm install
+RUN npm install -g npm@latest \
+    && npm config set fetch-timeout 120000 \
+    && npm config set fetch-retries 5 \
+    && npm config set fetch-retry-mintimeout 20000 \
+    && npm config set fetch-retry-maxtimeout 120000 \
+    && npm cache clean --force \
+    && rm -rf node_modules package-lock.json
 
+RUN npm install --omit=optional
 
-
-
-# Builder - Construye la aplicación
+# Builder - Construye la aplicación 
 FROM node:21-alpine3.19 as build
+
+ARG ORDERS_DATABASE_URL
+ENV DATABASE_URL=$ORDERS_DATABASE_URL
+
+# Imprimir el arg para ver el valor recibido
+RUN echo "database_url ::: $ORDERS_DATABASE_URL";
 
 WORKDIR /usr/src/app
 
 # Copiar de deps, los módulos de node
 COPY --from=deps /usr/src/app/node_modules ./node_modules
 
-# Copiar todo el codigo fuente de la aplicación
+# Copiar todo el código fuente de la aplicación
 COPY . .
 
+
+RUN npx prisma migrate deploy
 RUN npx prisma generate
 
-# RUN npm run test
+# Construye la aplicación
 RUN npm run build
 
 RUN npm ci -f --only=production && npm cache clean --force
 
-
-
-# Crear la imagen final de Docker
+# Crear la imagen final de docker 
 FROM node:21-alpine3.19 as prod
 
 WORKDIR /usr/src/app
 
-
 COPY --from=build /usr/src/app/node_modules ./node_modules
 
-# Copiar la carpeta de DIST
+# Copiar la carpeta dist generada en la etapa de build
 COPY --from=build /usr/src/app/dist ./dist
-COPY --from=build /usr/src/app/prisma ./prisma
-
 
 ENV NODE_ENV=production
 
+# Solo privilegio de ejecución
 USER node
 
-
-EXPOSE 3000
+EXPOSE 3000 
 
 CMD [ "node", "dist/main.js" ]
